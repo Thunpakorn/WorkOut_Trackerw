@@ -3,7 +3,9 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Dumbbell, ArrowRight, CheckCircle2, Lock, Mail, ShieldCheck } from "lucide-react";
+import { Dumbbell, ArrowRight, Lock, Mail, ShieldCheck, AlertCircle } from "lucide-react";
+import { useAuth } from "@/lib/supabase/auth-context";
+import { useWorkout } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -11,25 +13,59 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { signInWithEmail, signUpWithEmail, signInWithGoogle } = useAuth();
+  const { t, lang } = useWorkout();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    const { error } = await signInWithEmail(email, password);
+    setIsLoading(false);
+
+    if (error) {
+      setErrorMessage(error.message || "Failed to sign in. Please check your credentials.");
+    } else {
       router.push("/");
-    }, 600);
+    }
   };
 
-  const handleGoogleAuth = () => {
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      router.push("/");
-    }, 600);
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    const { error } = await signUpWithEmail(email, password, name);
+    setIsLoading(false);
+
+    if (error) {
+      setErrorMessage(error.message || "Failed to register account.");
+    } else {
+      setSuccessMessage("Account created successfully! Check your email to confirm registration.");
+      setTimeout(() => router.push("/"), 1500);
+    }
+  };
+
+  const handleGoogleAuth = async () => {
+    setIsLoading(true);
+    setErrorMessage("");
+
+    const { error } = await signInWithGoogle();
+    setIsLoading(false);
+
+    if (error) {
+      setErrorMessage(error.message || "Failed to connect with Google.");
+    }
   };
 
   return (
@@ -45,25 +81,40 @@ export default function LoginPage() {
             <Dumbbell className="h-8 w-8 stroke-[2.5]" />
           </div>
           <h1 className="text-2xl font-black tracking-tight text-white flex items-center space-x-1">
-            <span>APEX</span>
-            <span className="text-lime-400">PULSE</span>
+            <span>WORKOUT</span>
+            <span className="text-lime-400">Track</span>
           </h1>
           <p className="text-xs text-zinc-400 max-w-xs">
-            Private mobile workout logger for weight training & treadmill cardio
+            {t("brandSub")}
           </p>
         </div>
 
         <Card className="border-zinc-800 bg-zinc-900/90 shadow-2xl backdrop-blur-xl">
           <CardHeader className="text-center pb-2">
-            <CardTitle className="text-xl font-bold">Welcome Back</CardTitle>
-            <CardDescription>Log in to access your workout metrics & history</CardDescription>
+            <CardTitle className="text-xl font-bold">{t("welcomeBackLogin")}</CardTitle>
+            <CardDescription>{t("logInToAccess")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
+            {/* Error / Success Alert Messages */}
+            {errorMessage && (
+              <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs flex items-center space-x-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{errorMessage}</span>
+              </div>
+            )}
+
+            {successMessage && (
+              <div className="p-3 rounded-xl bg-lime-500/10 border border-lime-500/30 text-lime-400 text-xs">
+                {successMessage}
+              </div>
+            )}
+
             {/* Google OAuth Button */}
             <Button
               type="button"
               variant="outline"
               onClick={handleGoogleAuth}
+              disabled={isLoading}
               className="w-full h-12 bg-zinc-950 border-zinc-800 text-white font-bold flex items-center justify-center space-x-2 hover:bg-zinc-800"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -84,7 +135,7 @@ export default function LoginPage() {
                   d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.3-6.4-5.2L1.9 16C3.7 19.7 7.5 23 12 23z"
                 />
               </svg>
-              <span>Continue with Google</span>
+              <span>{t("continueWithGoogle")}</span>
             </Button>
 
             <div className="relative flex items-center justify-center my-2">
@@ -92,22 +143,22 @@ export default function LoginPage() {
                 <div className="w-full border-t border-zinc-800" />
               </div>
               <span className="relative px-3 bg-zinc-900 text-[11px] uppercase font-bold text-zinc-500">
-                Or with Email
+                {t("orWithEmail")}
               </span>
             </div>
 
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid grid-cols-2 mb-4">
-                <TabsTrigger value="login">Sign In</TabsTrigger>
-                <TabsTrigger value="signup">Register</TabsTrigger>
+                <TabsTrigger value="login">{t("signIn")}</TabsTrigger>
+                <TabsTrigger value="signup">{t("register")}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="login">
-                <form onSubmit={handleSubmit} className="space-y-3">
+                <form onSubmit={handleSignIn} className="space-y-3">
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-zinc-400 flex items-center space-x-1">
                       <Mail className="w-3.5 h-3.5 text-lime-400" />
-                      <span>Email Address</span>
+                      <span>{t("emailAddress")}</span>
                     </label>
                     <Input
                       type="email"
@@ -121,7 +172,7 @@ export default function LoginPage() {
                   <div className="space-y-1">
                     <label className="text-xs font-bold text-zinc-400 flex items-center space-x-1">
                       <Lock className="w-3.5 h-3.5 text-lime-400" />
-                      <span>Password</span>
+                      <span>{t("password")}</span>
                     </label>
                     <Input
                       type="password"
@@ -137,27 +188,45 @@ export default function LoginPage() {
                     disabled={isLoading}
                     className="w-full h-12 bg-lime-500 text-zinc-950 font-black text-sm accent-glow mt-2"
                   >
-                    {isLoading ? "Signing in..." : "Sign In to Gym Tracker"}
+                    {isLoading ? "..." : t("signIn")}
                     {!isLoading && <ArrowRight className="w-4 h-4 ml-2 stroke-[3]" />}
                   </Button>
                 </form>
               </TabsContent>
 
               <TabsContent value="signup">
-                <form onSubmit={handleSubmit} className="space-y-3">
+                <form onSubmit={handleSignUp} className="space-y-3">
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-zinc-400">Your Name</label>
-                    <Input type="text" placeholder="Alex Morgan" required />
+                    <label className="text-xs font-bold text-zinc-400">{t("yourName")}</label>
+                    <Input
+                      type="text"
+                      placeholder="Alex Morgan"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                    />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-zinc-400">Email Address</label>
-                    <Input type="email" placeholder="alex@gym.com" required />
+                    <label className="text-xs font-bold text-zinc-400">{t("emailAddress")}</label>
+                    <Input
+                      type="email"
+                      placeholder="alex@gym.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-xs font-bold text-zinc-400">Create Password</label>
-                    <Input type="password" placeholder="••••••••" required />
+                    <label className="text-xs font-bold text-zinc-400">{t("password")}</label>
+                    <Input
+                      type="password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
                   </div>
 
                   <Button
@@ -165,7 +234,7 @@ export default function LoginPage() {
                     disabled={isLoading}
                     className="w-full h-12 bg-lime-500 text-zinc-950 font-black text-sm accent-glow mt-2"
                   >
-                    {isLoading ? "Creating account..." : "Create Free Account"}
+                    {isLoading ? "..." : t("createAccount")}
                     {!isLoading && <ArrowRight className="w-4 h-4 ml-2 stroke-[3]" />}
                   </Button>
                 </form>
@@ -177,7 +246,7 @@ export default function LoginPage() {
         {/* Bottom Security Note */}
         <div className="flex items-center justify-center space-x-1.5 text-xs text-zinc-500">
           <ShieldCheck className="w-4 h-4 text-lime-400" />
-          <span>Private encrypted session. No public feed.</span>
+          <span>{t("privateEncrypted")}</span>
         </div>
       </div>
     </div>
