@@ -23,7 +23,6 @@ export function TopHeader() {
     { href: "/", label: t("navDashboard") },
     { href: "/history", label: t("navHistory") },
     { href: "/exercises", label: t("navExercises") },
-    { href: "/templates", label: t("navTemplates") },
     { href: "/stats", label: t("navProgress") },
     { href: "/profile", label: t("navProfile") },
   ];

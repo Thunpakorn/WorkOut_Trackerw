@@ -162,63 +162,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Simplified Goals & Quick Routines Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {/* Weekly Target Progress Card */}
-            <Card className="border-zinc-800 bg-zinc-900/90 sm:col-span-1">
-              <CardContent className="p-5 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-1.5 text-xs font-bold text-cyan-400">
-                    <Trophy className="w-4 h-4" />
-                    <span>{t("weeklyGoal")}</span>
-                  </div>
-                  <span className="text-xs font-bold text-white tabular-nums">
-                    {workoutsThisWeek} / {user.weeklyGoal} {t("workoutsCompleted")}
-                  </span>
-                </div>
 
-                <Progress value={weeklyProgress} indicatorClassName="bg-cyan-400" />
-
-                <div className="flex justify-between items-center text-[11px] text-zinc-400">
-                  <span>Target: {user.weeklyGoal}/wk</span>
-                  <span className="font-bold text-cyan-400">{weeklyProgress}% {t("complete")}</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Quick Templates Quick-Start */}
-            <Card className="border-zinc-800 bg-zinc-900/90 sm:col-span-2">
-              <CardContent className="p-5 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-1.5 text-xs font-bold text-lime-400">
-                    <Zap className="w-4 h-4 fill-current" />
-                    <span>{t("quickStartTemplates")}</span>
-                  </div>
-                  <Link href="/templates" className="text-xs font-bold text-lime-400 hover:underline">
-                    {t("viewAll")}
-                  </Link>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  {templates.slice(0, 2).map((tpl) => (
-                    <Link key={tpl.id} href="/workout/active">
-                      <div
-                        onClick={() => startWorkoutFromTemplate(tpl.id)}
-                        className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 hover:border-lime-500/50 transition-all cursor-pointer space-y-1 group"
-                      >
-                        <h4 className="text-xs font-bold text-white group-hover:text-lime-400 transition-colors truncate">
-                          {tpl.title}
-                        </h4>
-                        <div className="text-[10px] text-zinc-400">
-                          {tpl.exercises.length} {lang === "th" ? "ท่า" : "exercises"}
-                        </div>
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
 
           {/* Recent Activity List */}
           <div className="space-y-3 pt-2">

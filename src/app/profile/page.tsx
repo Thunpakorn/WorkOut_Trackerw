@@ -172,23 +172,6 @@ export default function ProfilePage() {
             </select>
           </div>
 
-          {/* Weekly Goal */}
-          <div className="flex items-center justify-between pt-3">
-            <div>
-              <div className="text-sm font-bold text-white">Weekly Workout Target</div>
-              <div className="text-xs text-zinc-400">Sessions per week goal display on dashboard</div>
-            </div>
-            <select
-              value={user.weeklyGoal}
-              onChange={(e) => updateUserProfile({ weeklyGoal: parseInt(e.target.value, 10) })}
-              className="h-9 rounded-xl bg-zinc-950 border border-zinc-800 px-3 text-xs font-bold text-lime-400 focus:outline-none"
-            >
-              <option value={3}>3 Workouts / wk</option>
-              <option value={4}>4 Workouts / wk</option>
-              <option value={5}>5 Workouts / wk</option>
-              <option value={6}>6 Workouts / wk</option>
-            </select>
-          </div>
         </CardContent>
       </Card>
 
